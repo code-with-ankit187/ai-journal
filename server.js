@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connect
-mongoose.connect("mongodb://127.0.0.1:27017/journalDB")
+mongoose.connect("mongodb+srv://ankitraj766:ankitraj4114@cluster0.io3ihjf.mongodb.net/journalDB?retryWrites=true&w=majority")
 .then(()=>console.log("MongoDB Connected"))
 .catch(err=>console.log(err));
 
@@ -161,6 +161,8 @@ summary
 });
 
 });
-app.listen(5000,()=>{
-    console.log("Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
