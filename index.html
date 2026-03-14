@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Journal</title>
+<style>
+body{
+font-family: Arial, sans-serif;
+background: linear-gradient(135deg,#667eea,#764ba2);
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.2);
+text-align:center;
+width:350px;
+}
+
+h2{
+color:#333;
+}
+
+textarea{
+width:100%;
+height:100px;
+padding:10px;
+border-radius:6px;
+border:1px solid #ccc;
+margin-top:10px;
+}
+
+button{
+padding:10px 15px;
+margin:10px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.save{
+background:#4CAF50;
+}
+
+.show{
+background:#2196F3;
+}
+
+ul{
+list-style:none;
+padding:0;
+margin-top:20px;
+}
+
+li{
+background:#f2f2f2;
+padding:10px;
+margin-top:10px;
+border-radius:5px;
+}
+
+
+body{
+font-family: Arial;
+background:#f4f6f8;
+text-align:center;
+padding:40px;
+}
+
+textarea{
+width:300px;
+height:100px;
+padding:10px;
+}
+
+button{
+padding:10px 15px;
+margin:10px;
+background:#4CAF50;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+ul{
+list-style:none;
+padding:0;
+}
+
+li{
+background:white;
+margin:10px auto;
+padding:10px;
+width:300px;
+border-radius:5px;
+}
+
+</style>
+</head>
+
+<body>
+   
+<div class="container">
+
+<h2>AI Journal</h2>
+
+<textarea id="text" placeholder="Write your thoughts"></textarea>
+<br><br>
+
+<button class="save" onclick="saveJournal()">Save Journal</button>
+<button class="show" onclick="loadJournals()">Show Journals</button>
+<button class="analyze" onclick="analyzeJournal()">Analyze journal</button>
+<button class="show" onclick="showInsights()">Show Insights</button>
+<div id="insights"></div>
+<div id="analysisResult"></div>
+<ul id="list"></ul>
+
+</div>
+
+<script>
+    function detectEmotion(text){
+
+text = text.toLowerCase();
+
+if(text.includes("happy") || text.includes("great") || text.includes("good")){
+return "happy";
+}
+
+if(text.includes("sad") || text.includes("tired") || text.includes("frustrated") || text.includes("overwhelmed")){
+return "sad";
+}
+
+if(text.includes("angry") || text.includes("hate")){
+return "angry";
+}
+
+return "neutral";
+
+}
+async function saveJournal(){
+
+const text = document.getElementById("text").value;
+
+const emotion = detectEmotion(text);
+
+const response = await fetch("http://localhost:5000/api/journal",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({
+userId:"1",
+ambience:"forest",
+text:text,
+emotion:emotion
+})
+});
+
+const data = await response.json();
+alert(data.message);
+
+}
+
+async function loadJournals(){
+
+const response = await fetch("http://localhost:5000/journals");
+const data = await response.json();
+
+const list = document.getElementById("list");
+list.innerHTML="";
+
+data.forEach(j=>{
+const li=document.createElement("li");
+li.innerText=j.text + " (" + j.emotion + ")";
+list.appendChild(li);
+});
+}
+async function analyzeJournal(){
+
+const text = document.getElementById("text").value;
+
+const response = await fetch("http://localhost:5000/api/journal/analyze",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({text:text})
+});
+
+const data = await response.json();
+
+document.getElementById("analysisResult").innerHTML=`
+Emotion: ${data.emotion} <br>
+Keywords: ${data.keywords.join(", ")} <br>
+Summary: ${data.summary}
+`;
+
+}
+async function showInsights(){
+
+const userId = "1";
+
+const response = await fetch(`http://localhost:5000/api/journal/insights/${userId}`);
+
+const data = await response.json();
+
+document.getElementById("insights").innerHTML = `
+<h3>Insights</h3>
+Total Entries: ${data.totalEntries} <br>
+Top Emotion: ${data.topEmotion} <br>
+Most Used Ambience: ${data.mostUsedAmbience} <br>
+Recent Keywords: ${data.recentKeywords ? data.recentKeywords.join(", ") : "none"}
+`;
+
+}
+
+</script>
+
+</body>
+</html>
