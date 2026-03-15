@@ -1,5 +1,7 @@
 const Journal = require("./models/Journal");
 
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -10,15 +12,21 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connect
-mongoose.connect("mongodb+srv://ankitraj766:ankitraj4114@cluster0.io3ihjf.mongodb.net/journalDB?retryWrites=true&w=majority")
-.then(()=>console.log("MongoDB Connected"))
-.catch(err=>console.log(err));
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+  console.log("MongoDB Connected");
+})
+.catch((err) => {
+  console.error("MongoDB Error:", err);
+});
 
 // Test route
 app.get("/", (req,res)=>{
     res.send("AI Journal Server Running");
 });
 function detectEmotion(text){
+if(!text) return "neutral";
+
 text = text.toLowerCase();
 
 if(text.includes("happy") || text.includes("good")) return "happy";
@@ -33,7 +41,7 @@ app.post("/api/journal", async (req, res) => {
    const { userId, ambience, text } = req.body;
    const emotion = detectEmotion(text);
      const cleanedText = text.trim();
-      const keywords = cleanedText.split(" ").slice(0,5);
+      const keywords = cleanedText ? cleanedText.split(" ").slice(0,5) : [];
 
         const summary = "User expressed " + emotion + " feelings";
     const newJournal = new Journal({
