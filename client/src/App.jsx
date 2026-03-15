@@ -30,7 +30,7 @@ alert(data.message);
 
 const loadJournals = async () => {
 
-const res = await fetch("http://localhost:5000/journals");
+const res = await fetch("http://localhost:5000/api/journal/");
 const data = await res.json();
 
 setJournals(data);
